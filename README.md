@@ -29,8 +29,11 @@ in this case. However, if you don't want to reboot phy rtl8211, you have to
 modify the function rtl8211f_proc_show() in realtek_ptp.c. First, remove 
 rtl8211f_ptp_exit and rtl8211f_ptp_init, and put the code below into rtl8211f_proc_show(),
 
+
 static int rtl8211f_proc_show(struct seq_file *m, void *v)
+
 {
+
 	struct rtl8211f_ptp *ptp = container_of(rtl8211f_clk_info, struct rtl8211f_ptp, caps);
         struct phy_device *phydev = ptp->phydev;
 
@@ -38,6 +41,7 @@ static int rtl8211f_proc_show(struct seq_file *m, void *v)
 	ptp->ptp_clock = ptp_clock_register(&ptp->caps, &phydev->mdio.dev);
 
 	return PTR_ERR_OR_ZERO(ptp->ptp_clock);
+
 }
 
 rtl8211f_proc_show() above won't reset rtl8211, and it will not lead to link down and up
