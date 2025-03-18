@@ -7,7 +7,7 @@ tested on various platforms.
 
 ## 🔹 Features
 ✅ Software PTP driver in **drivers/net/ethernet/vendor/gmac/gmac_ptp.c**  
-✅ Hardware PTP support tested on various devices in drivers/net/phy/realtek/ 
+✅ Hardware PTP support tested on various devices
 ✅ Compatible with Linux Kernel 5.10 and later  
 
 ## 🔹 Installation
