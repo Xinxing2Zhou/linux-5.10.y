@@ -2,9 +2,9 @@
 /*
  * Driver for Realtek 8211FS(I)-VS PHYs - timestamping and PHC support
  *
- * Authors: Xinxing Zhou
+ * Authors: Xinxing Zhou <xn989695@dal.ca>
  * License: GPL
- * Email: xn989695@dal.ca
+ *
  */
 
 #include <linux/gpio/consumer.h>
