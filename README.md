@@ -1,3 +1,8 @@
+Linux kernel
+============
+
+There are several guides for kernel developers and users.
+
 Software ptp is in directory drivers/net/ethernet/vendor/gmac, 
 and gmac_ptp.c is the driver.
 
