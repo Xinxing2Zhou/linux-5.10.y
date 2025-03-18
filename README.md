@@ -1,10 +1,23 @@
-Linux kernel
-============
+# Linux Kernel 5.10.y - PTP Software & Hardware Driver
 
-There are several guides for kernel developers and users.
+## 🔹 Introduction
+This repository contains the **PTP (Precision Time Protocol) driver** for 
+the **Linux 5.10.y kernel**. It includes both **software and hardware implementations**, 
+tested on various platforms.
 
-Software ptp is in directory drivers/net/ethernet/vendor/gmac, 
-and gmac_ptp.c is the driver.
+## 🔹 Features
+✅ Software PTP driver in **drivers/net/ethernet/vendor/gmac/gmac_ptp.c**  
+✅ Hardware PTP support tested on various devices in drivers/net/phy/realtek/ 
+✅ Compatible with Linux Kernel 5.10 and later  
+
+## 🔹 Installation
+Follow these steps to integrate the PTP driver into your Linux system:
+
+1. Clone this repository:
+
+   git clone https://github.com/Xinxing2Zhou/linux-5.10.y.git
+
+2. Introduction
 
 Hardware ptp has been tested on Realtek 8211FS(I)-VS phy device, 
 and the driver is in directory drivers/net/phy/realtek/.
@@ -18,6 +31,8 @@ it is hardware ptp if the voltage level of gpio7_2 is high.
 This kernel can be compiled using toolchain aarch64-v01c01-linux-gnu-gcc,
 which is contained in Hi3519DV500_SDK_V2.0.1.1, or you don't need to 
 compile the kernel, realtek_ptp.c can be put into any version of kernel.
+
+3. How to test PTP
 
 Please remember download linuxptp from https://github.com/richardcochran/linuxptp.git,
 then cross compile linuxptp, you can get ptp4l command, and run this command like,
