@@ -1,0 +1,8 @@
+menuconfig VENDOR_USB_PHY
+	tristate "Vendor USB support"
+
+if VENDOR_USB_PHY
+
+source "drivers/phy/vendor/usb/Kconfig"
+
+endif # VENDOR_USB_PHY

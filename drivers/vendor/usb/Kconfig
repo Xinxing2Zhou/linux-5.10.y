@@ -1,0 +1,6 @@
+config USB_WING
+    tristate "Wing USB controller"
+    select EXTCON
+	select USB_DWC3_DUAL_ROLE
+	help
+	  Say Y or M here if you want support Wing USB controller.

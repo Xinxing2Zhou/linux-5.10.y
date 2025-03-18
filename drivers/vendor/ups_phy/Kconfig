@@ -1,0 +1,28 @@
+menu "Wing UPS Phy"
+
+config WING_UPS_PHY
+    tristate "Support Wing UPS Phy"
+	select GENERIC_PHY
+	help
+	  Say Y or M here if you want support Wing UPS phy.
+
+if WING_UPS_PHY
+config WING_UPS_XVP_PHY
+	bool "Support UPS Xvp Phy"
+	help
+	  Say Y here if you want to support xvp phy.
+
+config WING_UPS_NANO_PHY
+	bool "Support UPS Nano Phy"
+	help
+	  Say Y here if you want to support nano phy.
+
+config WING_UPS_MISSILE_PHY
+	bool "Support UPS Missile Phy"
+	help
+	  Say Y here if you want to support missile phy.
+
+endif #WING_UPS_PHY
+
+endmenu
+

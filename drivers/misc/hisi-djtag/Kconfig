@@ -1,0 +1,5 @@
+config HISI_DJTAG
+	tristate "hisilicon djtag r/w interface via syscon"
+	depends on ARM64 || COMPILE_TEST
+	help
+	  This enables support djtag r/w for some modules.

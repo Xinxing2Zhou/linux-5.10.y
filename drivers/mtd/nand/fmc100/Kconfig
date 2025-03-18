@@ -1,0 +1,16 @@
+#
+# vendor flash memory controller SPI nand device driver version 100
+# drivers/mtd/nand/fmc100/Kconfig
+#
+
+config MTD_SPI_NAND_FMC100
+	tristate "Vendor Flash Memory Controller v100 SPI Nand devices support"
+	depends on MFD_BSP_FMC && MTD_SPI_NAND_BSP
+	select MISC_FILESYSTEMS
+	select MTD_BLOCK
+	select YAFFS_FS
+	select YAFFS_YAFFS2
+	help
+	  Vendor Flash Memory Controller version 100 is called fmc100 for
+	  short. The controller driver support registers and DMA transfers
+	  while reading or writing the SPI nand flash.

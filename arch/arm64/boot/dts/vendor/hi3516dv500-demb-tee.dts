@@ -1,0 +1,326 @@
+/*
+ * Copyright (c) HiSilicon (Shanghai) Technologies Co., Ltd. 2020-2023. All rights reserved.
+ */
+
+/dts-v1/;
+/* reserved for warmreset */
+/* reserved for arm trustedfirmware */
+/* Modify this configuration according to the system framework */
+
+#include "hi3516dv500.dtsi"
+#include <memory_layout.dtsi>
+
+/ {
+	model = "Vendor HI3516DV500 DEMO Board";
+	compatible = "vendor,hi3516dv500";
+
+	aliases {
+		serial0 = &uart0;
+
+		serial1 = &uart1;
+		serial2 = &uart2;
+		serial3 = &uart3;
+		serial4 = &uart4;
+		serial5 = &uart5;
+
+		i2c0 = &i2c_bus0;
+		i2c1 = &i2c_bus1;
+		i2c2 = &i2c_bus2;
+		i2c3 = &i2c_bus3;
+		i2c4 = &i2c_bus4;
+		i2c5 = &i2c_bus5;
+		i2c6 = &i2c_bus6;
+		i2c7 = &i2c_bus7;
+
+		spi0 = &spi_bus0;
+		spi1 = &spi_bus1;
+		spi2 = &spi_bus2;
+		spi3 = &spi_bus3;
+
+		gpio0 = &gpio_chip0;
+		gpio1 = &gpio_chip1;
+		gpio2 = &gpio_chip2;
+		gpio3 = &gpio_chip3;
+		gpio4 = &gpio_chip4;
+		gpio5 = &gpio_chip5;
+		gpio6 = &gpio_chip6;
+		gpio7 = &gpio_chip7;
+		gpio8 = &gpio_chip8;
+		gpio9 = &gpio_chip9;
+		gpio10 = &gpio_chip10;
+		gpio11 = &gpio_chip11;
+		gpio12 = &gpio_chip12;
+		gpio13 = &gpio_chip13;
+		gpio14 = &gpio_chip14;
+	};
+
+	chosen {
+		bootargs = "earlycon=pl011,0x11040000 mem=512M console=ttyAMA0,115200 clk_ignore_unused root=/dev/mtdblock2 rootfstype=yaffs2 rw mtdparts=bspnand:1M(boot),9M(kernel),32M(rootfs),1M(this_bootargs_string_is_reserved_for_bootargs_form_uboot!!!_it_must_be_longer_than_bootargs_form_uboot!!!_this_bootargs_string_is_reserved_for_bootargs_form_uboot!!!_it_must_be_longer_than_bootargs_form_uboot!!!_this_bootargs_string_is_reserved_for_bootargs_form_uboot!!!_it_must_be_longer_than_bootargs_form_uboot!!!_this_bootargs_string_is_reserved_for_bootargs_form_uboot!!!_it_must_be_longer_than_bootargs_form_uboot!!!_this_bootargs_string_is_reserved_for_bootargs_form_uboot!!!_it_must_be_longer_than_bootargs_form_uboot!!!)";
+
+		linux,initrd-start = <0x60000040>;
+		linux,initrd-end = <0x61000000>;
+	};
+
+	cpus {
+		#address-cells = <2>;
+		#size-cells = <0>;
+
+		cpu@0 {
+			compatible = "arm,cortex-a55";
+			device_type = "cpu";
+			reg = <0x0 0x0>;
+			enable-method = "psci";
+			//clock-latency = <100000>; /* From legacy driver */
+		};
+
+		cpu@1 {
+			compatible = "arm,cortex-a55";
+			device_type = "cpu";
+			reg = <0x0 0x100>;
+			enable-method = "psci";
+			//clock-latency = <200000>; /* From legacy driver */
+		};
+	};
+
+	memory {
+		device_type = "memory";
+		reg = <0x0 0x45030000 0x0 0x40000000>;
+	};
+
+	reserved-memory {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		optee_shm@48600000 {
+			reg = <0x0 0x48600000 0x0 0x00400000>;
+		};
+	};
+};
+
+&uart0 {
+	status = "okay";
+};
+
+&uart1 {
+	status = "disabled";
+};
+
+&uart2 {
+	status = "disabled";
+};
+
+&uart3 {
+	status = "disabled";
+};
+
+&uart4 {
+	status = "disabled";
+};
+&uart5 {
+	status = "disabled";
+};
+
+&rtc{
+	status = "okay";
+};
+
+&i2c_bus0 {
+	status = "okay";
+};
+
+&i2c_bus1 {
+	status = "okay";
+};
+
+&i2c_bus2 {
+	status = "okay";
+};
+
+&i2c_bus3 {
+	status = "okay";
+};
+
+&i2c_bus4 {
+	status = "okay";
+};
+
+&i2c_bus5 {
+	status = "okay";
+};
+
+&i2c_bus6 {
+	status = "okay";
+};
+
+&i2c_bus7 {
+	status = "okay";
+};
+
+&spi_bus0{
+	status = "okay";
+
+	spidev@0 {
+		compatible = "rohm,dh2228fv";
+		reg = <0>;
+		pl022,interface = <0>;
+		pl022,com-mode = <0>;
+		spi-max-frequency = <25000000>;
+	};
+	spidev@1 {
+		compatible = "rohm,dh2228fv";
+		reg = <1>;
+		pl022,interface = <0>;
+		pl022,com-mode = <0>;
+		spi-max-frequency = <25000000>;
+	};
+};
+
+&spi_bus1{
+	status = "okay";
+	spidev@0 {
+		compatible = "rohm,dh2228fv";
+		reg = <0>;
+		pl022,interface = <0>;
+		pl022,com-mode = <0>;
+		spi-max-frequency = <25000000>;
+	};
+};
+
+&spi_bus2{
+	status = "okay";
+	spidev@0 {
+		compatible = "rohm,dh2228fv";
+		reg = <0>;
+		pl022,interface = <0>;
+		pl022,com-mode = <0>;
+		spi-max-frequency = <25000000>;
+	};
+};
+
+&spi_bus3{
+	status = "okay";
+
+	spidev@0 {
+		compatible = "rohm,dh2228fv";
+		reg = <0>;
+		pl022,interface = <0>;
+		pl022,com-mode = <0>;
+		spi-max-frequency = <25000000>;
+	};
+	spidev@1 {
+		compatible = "rohm,dh2228fv";
+		reg = <1>;
+		pl022,interface = <0>;
+		pl022,com-mode = <0>;
+		spi-max-frequency = <25000000>;
+	};
+};
+
+&gpio_chip0 {
+	status = "okay";
+};
+
+&gpio_chip1 {
+	status = "okay";
+};
+
+&gpio_chip2 {
+	status = "okay";
+};
+
+&gpio_chip3 {
+	status = "okay";
+};
+
+&gpio_chip4 {
+	status = "okay";
+};
+
+&gpio_chip5 {
+	status = "okay";
+};
+
+&gpio_chip6 {
+	status = "okay";
+};
+
+&gpio_chip7 {
+	status = "okay";
+};
+
+&gpio_chip8 {
+	status = "okay";
+};
+
+&gpio_chip9 {
+	status = "okay";
+};
+
+&gpio_chip10 {
+	status = "okay";
+};
+
+&gpio_chip11 {
+	status = "okay";
+};
+
+&gpio_chip12 {
+	status = "okay";
+};
+
+&gpio_chip13 {
+	status = "okay";
+};
+
+&gpio_chip14 {
+	status = "okay";
+};
+
+&sfc {
+	sfc@0 {
+		compatible = "jedec,spi-nor";
+		reg = <0>;
+		spi-max-frequency = <200000000>;
+		m25p,fast-read;
+	};
+};
+
+&snfc {
+	nand@0 {
+		compatible = "jedec,spi-nand";
+		reg = <0>;
+		spi-max-frequency = <200000000>;
+	};
+};
+
+&mdio {
+	ethphy: ethernet-phy@1 {
+		reg = <1>;
+	};
+};
+
+&gmac {
+	phy-handle = <&ethphy>;
+	phy-mode = "rgmii-id";
+};
+
+&edmacv310_0 {
+	status = "disabled";
+};
+
+&adc {
+	status = "okay";
+};
+
+&pwm {
+	status = "okay";
+};
+
+&mmc1 {
+	status = "okay";
+};
+
+&mmc2 {
+	status = "disabled";
+};

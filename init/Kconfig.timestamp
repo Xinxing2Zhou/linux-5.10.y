@@ -1,0 +1,6 @@
+
+config CMD_TIMESTAMP
+	bool "Show timing information that stamped during booting stage in the start_kernel"
+	default n
+	help
+	  The timestamp is always recorded internally, you can use 'dmesg | grep timestamp' command to check the details.

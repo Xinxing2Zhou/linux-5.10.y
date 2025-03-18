@@ -1,0 +1,17 @@
+obj-y += securecutil.o
+obj-y += strncpy_s.o
+obj-y += vsprintf_s.o
+obj-y += snprintf_s.o
+obj-y += memcpy_s.o
+obj-y += memmove_s.o
+obj-y += strcat_s.o
+obj-y += secureprintoutput_a.o
+obj-y += memset_s.o
+obj-y += strtok_s.o
+obj-y += sprintf_s.o
+obj-y += strncat_s.o
+obj-y += strcpy_s.o
+obj-y += vsnprintf_s.o
+obj-y += secureinput_a.o
+obj-y += vsscanf_s.o
+obj-y += sscanf_s.o

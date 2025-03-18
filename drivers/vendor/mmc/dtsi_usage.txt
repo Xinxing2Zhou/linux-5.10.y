@@ -1,0 +1,58 @@
+* Nebula SDHCI Controller
+
+The Nebula SDHCI Controller act as a MMC controller
+to support MMC, SD, and SDIO types of memory cards.
+
+This file documents differences between the core properties in mmc.txt
+and the properties used by the nebula driver.
+
+Refer to mmc.txt for standard MMC bindings.
+
+Required properties:
+- compatible: value should be "nebula,sdhci" for nebula controllers
+
+- reg: physical base address of the controller and length
+- interrupts: Should contain MSDC interrupt number
+- clocks: Should contain phandle for the clock feeding the MMC controller
+- clock-names: Should contain the following:
+        "mmc_clk" - source clock (required)
+- resets: Array of clocks required for Nebula Host.
+- resets-names: Array of clocks required for Nebula Host. Should contain the following:
+        "crg_reset" - source reset (mandatory)
+        "dll_reset" - source reset (mandatory)
+        "crg_tx" - crg tx reset (Optional)
+        "crg_rx" - crg rx reset (Optional)
+		"samp_rst" - sample reset (Optional)
+
+Optional properties:
+- devid: device id(emmc:0, sdio0:1, sdio1:2).
+- fpga: nebula driver go fpga branch, no turning, no iocfg
+- reset_out_drv: reset host out of driver, by resets node.
+- pm_runtime_enable: deivce support power mangerment runtime.
+- sample_turning: if device not support edge turning, enable sample_turning
+- crg_regmap: crg register handle.
+- iocfg_regmap: iocfg register handle.
+
+Examples:
+emmc:emmc@0x01710000 {
+    compatible = "nebula,sdhci";
+    reg = <0x01710000 0x1000>;
+    interrupts = <0 221 4>;
+    clocks = <&huanglong_clock PERI_CRG426_EMMC>;
+    clock-names = "mmc_clk";
+    resets = <&clock 0x34c0 16>, <&clock 0x34c0 17>, <&clock 0x34c0 18>, <&clock 0x34c4 1>;
+    reset-names = "crg_reset", "crg_tx", "crg_rx", "dll_reset";
+    crg_regmap = <&huanglong_clock>;
+    iocfg_regmap = <&huanglong_iocfg>;
+    max-frequency = <196000000>;
+    disable-wp;
+    non-removable;
+    bus-width = <8>;
+    mmc-hs200-1_8v;
+    mmc-hs400-1_8v;
+    mmc-hs400-enhanced-strobe;
+    cap-mmc-highspeed;
+    cap-mmc-hw-reset;
+    devid = <0>;
+    status = "okay";
+};

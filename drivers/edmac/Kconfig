@@ -1,0 +1,29 @@
+#
+# Sensor device configuration
+#
+
+config EDMAC
+	tristate "Vendor EDMAC Controller support"
+	depends on (ARCH_BSP && !EDMACV310)
+	help
+	  The Direction Memory Access(EDMA) is a high-speed data transfer
+	  operation. It supports data read/write between peripherals and
+	  memories without using the CPU.
+	  Vendor EDMA Controller(EDMAC) directly transfers data between
+	  a memory and a peripheral, between peripherals, or between memories.
+	  This avoids the CPU intervention and reduces the interrupt handling
+	  overhead of the CPU.
+
+if EDMAC
+
+config EDMAC_CHANNEL_NUM
+	int "edmac channel num"
+	default "8"
+
+config EDMAC_INTERRUPT
+	bool "Vendor EDMAC Controller interrupt mode support"
+	depends on EDMAC
+	help
+	  open Vendor EDMAC Controller interrupt mode
+
+endif

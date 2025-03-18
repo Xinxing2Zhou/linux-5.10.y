@@ -1,0 +1,26 @@
+menuconfig VDMA_V100
+	tristate "Vendor VDMA Controller V100"
+	depends on ARCH_HI3556AV100 || ARCH_HI3519AV100 || ARCH_HI3568V100
+	default n if ARCH_HI3556AV100 || ARCH_HI3519AV100 || ARCH_HI3568V100
+	help
+	  This is the driver for Vendor VDMA controoller
+	  IP.
+
+if VDMA_V100
+
+config VDMA_CHN_NUM
+	int "VDMAV100 max channel number"
+	default 32
+
+config VDMA_TRANSFER_THRESHOLD
+        int "VDMA data transfer threshold KBytes"
+        range 4 16384
+        default "128" if (ARCH_HI3556AV100 || ARCH_HI3519AV100 || ARCH_HI3568V100)
+
+config VDMA_MISC_DEV
+	bool "VDMAV100 misc dev"
+	default y if (ARCH_HI3556AV100 || ARCH_HI3519AV100 || ARCH_HI3568V100)
+	depends on VDMA_V100
+
+
+endif

@@ -1,0 +1,10 @@
+menu "Vendor driver support"
+
+source "drivers/vendor/cma/Kconfig"
+source "drivers/vendor/npu/Kconfig"
+source "drivers/vendor/usb/Kconfig"
+source "drivers/vendor/ups_phy/Kconfig"
+source "drivers/vendor/basedrv_clk/Kconfig"
+source "drivers/vendor/mmc/Kconfig"
+
+endmenu

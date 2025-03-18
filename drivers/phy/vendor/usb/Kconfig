@@ -1,0 +1,87 @@
+#
+# Phy drivers for Vendor platforms
+#
+config PHY_BSP_USB2
+	bool
+	depends on (!ARCH_HI3559AV100 && !ARCH_HI3569V100 && !ARCH_HI3516EV200 && \
+		!ARCH_HI3516EV300 && !ARCH_HI3518EV300 && !ARCH_HI3516DV200 && \
+		!ARCH_HI3519DV500_FAMILY && !ARCH_SD3491V100)
+	default y
+	help
+	  Support for PHY on Vendor Socs. This Phy supports
+	  USB 1.5Mb/s, USB 12Mb/s, USB 480Mb/s speeds. It suppots one
+	  USB host port to accept one USB device. Support init the phy
+	  and adjust phy Eye Diagram.
+
+config PHY_BSP_USB3
+	bool
+	depends on (ARCH_HI3519AV100 || ARCH_HI3556AV100 || ARCH_HI3559AV100 || \
+		ARCH_HI3569V100 || ARCH_HI3568V100 || ARCH_HI3531DV200 || \
+		ARCH_HI3535AV100 || ARCH_HI3519DV500_FAMILY || ARCH_SD3491V100)
+	default y
+	help
+	  Support for PHY on Vendor Socs. This Phy supports
+	  USB3.0 and Compatible with USB2.0. It suppots one
+	  USB host port to accept one USB device. Support init the phy
+	  and adjust phy Eye Diagram.
+
+config BSP_USB_PHY
+	bool "Vendor USB PHY driver"
+	depends on (!ARCH_HI3516EV200 && !ARCH_HI3516EV300 && !ARCH_HI3518EV300 && \
+		!ARCH_HI3516DV200)
+	default y
+	help
+	  Support for PHY on Vendor Socs. This Phy supports
+	  USB 1.5Mb/s, USB 12Mb/s, USB 480Mb/s speeds. It suppots one
+	  USB host port to accept one USB device. Support init the phy
+	  and adjust phy Eye Diagram.
+
+config PHY_BSP_XVP_USB2
+	tristate "Vendor XVP USB2 PHY Driver"
+	depends on (ARCH_HI3516EV200 || ARCH_HI3516EV300 || ARCH_HI3518EV300 || \
+		ARCH_HI3516DV200)
+	select GENERIC_PHY
+	default y
+	help
+	  Support for PHY on Vendor Socs. This Phy supports
+	  USB 1.5Mb/s, USB 12Mb/s, USB 480Mb/s speeds. It suppots one
+	  USB host port to accept one USB device. Support init the phy
+	  and adjust phy Eye Diagram.
+
+menuconfig USB_MODE_OPTION
+	bool "Vendor USB related configuration"
+	depends on (!ARCH_HI3516EV200 && !ARCH_HI3516EV300 && !ARCH_HI3518EV300 && \
+		!ARCH_HI3516DV200 && !ARCH_HI3531DV200 && !ARCH_HI3535AV100 &&	\
+		!ARCH_HI3521DV200 && !ARCH_HI3520DV500 && !ARCH_HI3536CV200)
+
+if USB_MODE_OPTION
+
+config USB_DRD0_IN_HOST
+	bool "USB DRD0 Mode Select HOST"
+	help
+	  Select whether the USB drd0 is working in host mode.
+
+config USB_DRD0_IN_DEVICE
+	bool "USB DRD0 Mode Select DEVICE"
+	depends on !USB_DRD0_IN_HOST
+	depends on (!ARCH_HI3531DV200 && !ARCH_HI3535AV100 && !ARCH_HI3521DV200 && \
+		!ARCH_HI3520DV500 && !ARCH_HI3536CV200)
+	help
+	  Select whether the USB drd0 is working in device mode.
+
+config USB_DRD1_IN_HOST
+	bool "USB DRD1 Mode Select HOST"
+	depends on (ARCH_HI3519AV100 || ARCH_HI3556AV100 || ARCH_HI3559AV100 ||	\
+		ARCH_HI3569V100 || ARCH_HI3568V100)
+	help
+	  Select whether the USB drd1 is working in host mode.
+
+config USB_DRD1_IN_DEVICE
+	bool "USB DRD1 Mode Select DEVICE"
+	depends on (!USB_DRD1_IN_HOST && !USB_DRD0_IN_DEVICE)
+	depends on (ARCH_HI3519AV100 || ARCH_HI3556AV100 || ARCH_HI3559AV100 || \
+		ARCH_HI3569V100 || ARCH_HI3568V100)
+	help
+	  Select whether the USB drd1 is working in device mode.
+
+endif # USB_MODE_OPTION

@@ -1,0 +1,3 @@
+config BASEDRV_CLK
+	bool "Basedrv IP Clock"
+	default y

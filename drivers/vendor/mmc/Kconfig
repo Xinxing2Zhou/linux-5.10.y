@@ -1,0 +1,23 @@
+#
+# MMC/SD host controller drivers
+#
+
+config MMC_SDHCI_NEBULA
+	tristate "SDHCI nebula support"
+	depends on MMC && MMC_SDHCI
+	help
+	  This selects the SDHCI nebula support.
+
+	  If you have a controller with this interface, say Y or M here.
+
+	  If unsure, say N.
+
+config MMC_QUICKBOOT
+	tristate "SDHCI support quick boot on the Vendor SoC"
+	depends on MMC_SDHCI_PLTFM && ((MMC_SDHCI_NEBULA = y) || (MMC_SDHCI_SOCT = y))
+	help
+	  This selects the SDHCI quick boot support for Vendor System-on-Chip devices.
+
+	  If you want to support this feature, say Y here.
+
+	  If unsure, say N.

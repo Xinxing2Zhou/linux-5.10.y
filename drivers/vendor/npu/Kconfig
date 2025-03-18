@@ -1,0 +1,7 @@
+
+config VENDOR_NPU
+	bool "Vendor NPU Feature"
+	default n
+	help
+	  Support Vendor NPU.
+

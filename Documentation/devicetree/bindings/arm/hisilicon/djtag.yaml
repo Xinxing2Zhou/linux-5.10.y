@@ -1,0 +1,78 @@
+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/arm/hisilicon/djtag.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: Hisilicon DJTAG r/w interfaces
+
+maintainers:
+  - Wei Xu <xuwei5@hisilicon.com>
+
+properties:
+  compatible:
+    enum:
+      - hisilicon,hip05-djtag
+      - hisilicon,hi1382-djtag
+      - hisilicon,sd6801-djtag
+      - hisilicon,djtag-v1
+      - hisilicon,djtag-v2
+      - hisilicon,djtag-v2-ex
+
+  syscon:
+    description: implement r/w interfaces via which sysctrl node.
+    $ref: /schemas/types.yaml#/definitions/phandle
+
+  djtag-mutex-access-protection:
+    description: |
+      Present if djtag need add mutex access protection to fix conflict with
+      firmware(like M3).
+    $ref: /schemas/types.yaml#/definitions/flag
+
+required:
+  - compatible
+  - syscon
+
+additionalProperties: false
+
+examples:
+  - |
+    /* If it have multi dies, set like below.
+     *
+     * We need sysctrl node for its register address and "syscon",
+     * but we don't implement sysctrl driver and don't care about
+     * what compatible it is.
+     */
+
+    /* for Hisilicon P660(hip05) or Hi1610 */
+    pa_sysctrl: system-controller@40010000 {
+        compatible = "hisilicon,peri-subctrl", "syscon";
+        reg = <0x40010000 0x10000>;
+    };
+
+    pc_sysctrl: system-controller@60010000 {
+        compatible = "hisilicon,peri-subctrl", "syscon";
+        reg = <0x60010000 0x10000>;
+    };
+
+    djtag0 {
+        compatible = "hisilicon,hip05-djtag";
+        syscon = <&pa_sysctrl>;
+    };
+
+    djtag1 {
+        compatible = "hisilicon,hip05-djtag";
+        syscon = <&pc_sysctrl>;
+    };
+
+    /* for Hisilicon Hi1382(hi1382) */
+    pc_sysctrl_f1010000: system-controller@f1010000 {
+        compatible = "hisilicon,peri-subctrl", "syscon";
+        reg = <0xf1010000 0x10000>;
+    };
+
+    djtag2 {
+        compatible = "hisilicon,hi1382-djtag";
+        syscon = <&pc_sysctrl_f1010000>;
+    };
+...
