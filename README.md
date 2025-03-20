@@ -1,4 +1,4 @@
-# Linux Kernel 5.10.y - PTP Software & Hardware Driver
+# Linux Kernel 5.10.y - RTL8211FS PTP Driver
 
 ## 🔹 Introduction
 This repository contains the **PTP (Precision Time Protocol) driver** for 
