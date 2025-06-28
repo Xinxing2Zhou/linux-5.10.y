@@ -164,5 +164,10 @@ struct rtl8211f_ptp {
 int rtl8211f_gettime(struct ptp_clock_info *info, struct timespec64 *ts);
 int rtl8211f_settime(struct ptp_clock_info *info, const struct timespec64 *ts);
 
+void rtl8211f_ptp_phy_reset(struct phy_device *phydev);
+void rtl8211f_ptp_capability_enable(struct phy_device *phydev);
+void rtl8211f_ptp_capability_disable(struct phy_device *phydev);
+void rtl8211f_sync_ethernet(struct phy_device *phydev);
+void rtl8211f_interupt_enable(struct phy_device *phydev);
 
 #endif  /* _REALTEK_PHY_H_ */

@@ -2,9 +2,9 @@
 /*
  * Driver for Realtek 8211FS(I)-VS PHYs - timestamping and PHC support
  *
- * Authors: Xinxing Zhou <xn989695@dal.ca>
+ * Authors: Xinxing Zhou
  * License: GPL
- *
+ * Copyright (c) 2024 Vision Zenith Corporation
  */
 
 #include <linux/gpio/consumer.h>
@@ -278,6 +278,7 @@ static int rtl8211f_hwtstamp(struct mii_timestamper *mii_ts, struct ifreq *ifr)
 {
 	struct rtl8211f_private *rtl8211f =
 		container_of(mii_ts, struct rtl8211f_private, mii_ts);
+    struct phy_device *phydev = rtl8211f->ptp->phydev;
 	struct hwtstamp_config cfg;
 	bool one_step = false;
 
@@ -306,9 +307,19 @@ static int rtl8211f_hwtstamp(struct mii_timestamper *mii_ts, struct ifreq *ifr)
 		break;
 	case HWTSTAMP_FILTER_PTP_V2_L4_EVENT:
 		/* ETH->IP->UDP->PTP */
+            
+        phy_write_paged(phydev, RTL8211F_E40_PAGE, RTL8211F_PTP_CTL, 
+            RTL8211F_DR_2STEP_INS | RTL8211F_FU_2STEP_INS | 
+            RTL8211F_PTPV2_UDPIPV4 | RTL8211F_PTP_ENABLE);
+    
 		break;
 	case HWTSTAMP_FILTER_PTP_V2_L2_EVENT:
 		/* ETH->PTP */
+
+        phy_write_paged(phydev, RTL8211F_E40_PAGE, RTL8211F_PTP_CTL, 
+            RTL8211F_DR_2STEP_INS | RTL8211F_FU_2STEP_INS | 
+            RTL8211F_PTPV2_LAYER2 | RTL8211F_PTP_ENABLE);
+    
 		break;
 	default:
 		return -ERANGE;
@@ -317,13 +328,16 @@ static int rtl8211f_hwtstamp(struct mii_timestamper *mii_ts, struct ifreq *ifr)
 	rtl8211f->ptp->rx_filter = cfg.rx_filter;
 
 	spin_lock_irq(&rtl8211f->ptp->tx_queue_lock);
-    
 	__skb_queue_purge(&rtl8211f->ptp->tx_queue);
 	__skb_queue_head_init(&rtl8211f->ptp->tx_queue);
-    
-    rtl8211f->ptp->configured = 1;
-    
 	spin_unlock_irq(&rtl8211f->ptp->tx_queue_lock);
+
+    spin_lock_irq(&rtl8211f->ptp->rx_queue_lock);
+	__skb_queue_purge(&rtl8211f->ptp->rx_queue);
+	__skb_queue_head_init(&rtl8211f->ptp->rx_queue);
+	spin_unlock_irq(&rtl8211f->ptp->rx_queue_lock);
+
+    rtl8211f->ptp->configured = true;
 
 	return copy_to_user(ifr->ifr_data, &cfg, sizeof(cfg)) ? -EFAULT : 0;
 }
@@ -338,15 +352,26 @@ static int rtl8211f_ts_info(struct mii_timestamper *mii_ts,
 	info->so_timestamping =
         SOF_TIMESTAMPING_TX_HARDWARE |
         SOF_TIMESTAMPING_RX_HARDWARE |
-        SOF_TIMESTAMPING_RAW_HARDWARE;
+        SOF_TIMESTAMPING_RAW_HARDWARE |
+        SOF_TIMESTAMPING_TX_SOFTWARE |
+		SOF_TIMESTAMPING_RX_SOFTWARE |
+		SOF_TIMESTAMPING_SOFTWARE;
 	info->tx_types =
 		(1 << HWTSTAMP_TX_OFF) |
 		(1 << HWTSTAMP_TX_ON) |
 		(1 << HWTSTAMP_TX_ONESTEP_SYNC);
 	info->rx_filters =
-		(1 << HWTSTAMP_FILTER_NONE) |
-		(1 << HWTSTAMP_FILTER_PTP_V2_L2_EVENT) |
-		(1 << HWTSTAMP_FILTER_PTP_V2_L4_EVENT);
+		((1 << HWTSTAMP_FILTER_NONE) |
+	    (1 << HWTSTAMP_FILTER_PTP_V1_L4_EVENT) |
+	    (1 << HWTSTAMP_FILTER_PTP_V1_L4_SYNC) |
+	    (1 << HWTSTAMP_FILTER_PTP_V1_L4_DELAY_REQ) |
+	    (1 << HWTSTAMP_FILTER_PTP_V2_L4_EVENT) |
+	    (1 << HWTSTAMP_FILTER_PTP_V2_L4_SYNC) |
+	    (1 << HWTSTAMP_FILTER_PTP_V2_L4_DELAY_REQ) |
+	    (1 << HWTSTAMP_FILTER_PTP_V2_EVENT) |
+	    (1 << HWTSTAMP_FILTER_PTP_V2_SYNC) |
+	    (1 << HWTSTAMP_FILTER_PTP_V2_DELAY_REQ) |
+	    (1 << HWTSTAMP_FILTER_ALL));
 
 	return 0;
 }
@@ -357,8 +382,9 @@ static void rtl8211f_txtstamp(struct mii_timestamper *mii_ts,
     struct rtl8211f_private *rtl8211f =
         container_of(mii_ts, struct rtl8211f_private, mii_ts);
 
-    if (!rtl8211f->ptp->configured)
+    if (!rtl8211f->ptp->configured) {
         return;
+    }
 
     if (rtl8211f->ptp->tx_type == HWTSTAMP_TX_OFF) {
         kfree_skb(skb);
@@ -379,8 +405,13 @@ static bool rtl8211f_rxtstamp(struct mii_timestamper *mii_ts,
     struct rtl8211f_private *rtl8211f =
         container_of(mii_ts, struct rtl8211f_private, mii_ts);
 
-    if (skb->protocol != htons(ETH_P_IP))
+    switch (skb->protocol) {
+    case htons(ETH_P_IP):      // IPv4 PTP
+    case htons(ETH_P_1588):    // IEEE 802.3 PTP
+        break;
+    default:
         return false;
+    }
 
     if (!rtl8211f->ptp->configured)
 		return false;
@@ -421,21 +452,22 @@ static const struct ptp_clock_info rtl8211f_clk_caps = {
 
 static struct ptp_clock_info *rtl8211f_clk_info = NULL;
 
-static void rtl8211f_ptp_phy_reset(struct phy_device *phydev)
+void rtl8211f_ptp_phy_reset(struct phy_device *phydev)
 {
     phy_write_paged(phydev, 0x0, 0x0, 0x9040);
 }
 
-static void rtl8211f_ptp_capability_enable(struct phy_device *phydev)
+void rtl8211f_ptp_capability_enable(struct phy_device *phydev)
 {
     phy_write_paged(phydev, RTL8211F_E40_PAGE, RTL8211F_PTP_CTL, 
         RTL8211F_DR_2STEP_INS | RTL8211F_FU_2STEP_INS | RTL8211F_SYNC_1STEP | 
         RTL8211F_PTPV2_UDPIPV4 | RTL8211F_PTP_ENABLE);
 }
 
-static void rtl8211f_ptp_capability_disable(struct phy_device *phydev)
+void rtl8211f_ptp_capability_disable(struct phy_device *phydev)
 {
-    phy_write_paged(phydev, RTL8211F_E40_PAGE, RTL8211F_PTP_CTL, 0x0);
+    phy_write_paged(phydev, RTL8211F_E40_PAGE, RTL8211F_PTP_CTL, 
+        RTL8211F_PTP_ENABLE);
 }
 
 /**
@@ -444,7 +476,7 @@ static void rtl8211f_ptp_capability_disable(struct phy_device *phydev)
  * After phy link-up, the value of (page 0xa43, 0x1a) should be 0x302e,
  * and the value of (page 0xe40, 0x13) should be 0x1.
  */
-static void rtl8211f_sync_ethernet(struct phy_device *phydev)
+void rtl8211f_sync_ethernet(struct phy_device *phydev)
 {
     int val = 0;
     
@@ -455,7 +487,7 @@ static void rtl8211f_sync_ethernet(struct phy_device *phydev)
     phy_write_paged(phydev, RTL8211F_E40_PAGE, RTL8211F_SYNCE_CTL, val);
 }
 
-static void rtl8211f_interupt_enable(struct phy_device *phydev)
+void rtl8211f_interupt_enable(struct phy_device *phydev)
 {
     phy_write_paged(phydev, RTL8211F_E40_PAGE, RTL8211F_PTP_INER, 
         RTL8211F_TX_TIMESTAMP | RTL8211F_RX_TIMESTAMP);
@@ -467,7 +499,7 @@ int rtl8211f_ptp_init(struct phy_device *phydev)
 
     rtl8211f_sync_ethernet(phydev);
     
-    rtl8211f_ptp_capability_enable(phydev);
+    rtl8211f_ptp_capability_disable(phydev);
 
     rtl8211f_ptp_phy_reset(phydev);
     
@@ -503,10 +535,45 @@ void rtl8211f_ptp_exit(struct phy_device *phydev)
     rtl8211f_ptp_capability_disable(phydev);
 }
 
+static long rtl8211f_ptp_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
+{
+    struct rtl8211f_ptp *ptp = container_of(rtl8211f_clk_info, struct rtl8211f_ptp, caps);
+    struct phy_device *phydev = ptp->phydev;
+    struct hwtstamp_config cfg;
+    
+    switch (cmd) {
+    case SIOCGHWTSTAMP:
+        if (copy_from_user(&cfg, (int __user *)arg, sizeof(cfg)))
+            return -EFAULT;
+
+        if (cfg.tx_type == HWTSTAMP_TX_OFF &&
+            cfg.rx_filter == HWTSTAMP_FILTER_NONE) {
+            phy_write_paged(phydev, RTL8211F_E40_PAGE, RTL8211F_PTP_CTL, 0x0);
+            
+            ptp->configured = false;
+            ptp->tx_type = cfg.tx_type;
+            ptp->rx_filter = cfg.rx_filter;
+            
+            return 0;
+        }
+
+        break;
+    default:
+        return -ENOTTY;
+    }
+
+    return 0;
+}
+
+static const struct proc_ops rtl8211f_ptp_proc_ops = {
+    .proc_ioctl = rtl8211f_ptp_ioctl,
+};
+
 int rtl8211f_ptp_probe(struct phy_device *phydev)
 {
 	struct rtl8211f_private *rtl8211f;
     struct device *dev = &phydev->mdio.dev;
+    struct proc_dir_entry *entry;
     int val;
 
     rtl8211f = devm_kzalloc(&phydev->mdio.dev, sizeof(*rtl8211f), GFP_KERNEL);
@@ -542,6 +609,13 @@ int rtl8211f_ptp_probe(struct phy_device *phydev)
 
         dev_info(&phydev->mdio.dev, "RTL8211FS(1)-VS PTP is supported\n");
     }
+
+    entry = proc_create_data("rtl8211f_ptp", 0666, NULL,
+                             &rtl8211f_ptp_proc_ops, NULL);
+    if (!entry)
+        dev_err(dev, "failed to create /proc/rtl8211f_ptp\n");
+    else
+        dev_err(dev, "/proc/rtl8211f_ptp created\n");
 
 	return 0;
 }
@@ -815,7 +889,7 @@ static int __init rtl8211f_gpio_interrupt_init(void)
 
     p = proc_create_data("hardware_ptp", S_IRUGO, NULL, &rtl8211f_ptp_ops, NULL);
     if (NULL == p) {
-        dev_err(dev, "realtek ptp creat failed, %d\n", ret);
+        dev_err(dev, "realtek ptp creat failed\n");
         return -EINVAL;
     }
 
@@ -834,6 +908,8 @@ static void __exit rtl8211f_gpio_interrupt_exit(void)
     }
 
     gpio_free(ptp->raw_pin);
+
+    iounmap(ptp->gpio_base);
 }
 
 late_initcall(rtl8211f_gpio_interrupt_init);
