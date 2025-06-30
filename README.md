@@ -6,7 +6,7 @@ the **Linux 5.10.y kernel**. It includes both **software and hardware implementa
 tested on various platforms.
 
 ## 🔹 Features
-✅ Software PTP driver in **drivers/net/ethernet/vendor/gmac/gmac_ptp.c**  
+✅ Software PTP driver in **drivers/net/ethernet/vendor/gmac/**  
 ✅ Hardware PTP tested on RTL8211FS(I)-VS in drivers/net/phy/realtek/ 
 
 
