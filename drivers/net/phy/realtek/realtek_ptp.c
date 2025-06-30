@@ -574,7 +574,6 @@ int rtl8211f_ptp_probe(struct phy_device *phydev)
 	struct rtl8211f_private *rtl8211f;
     struct device *dev = &phydev->mdio.dev;
     struct proc_dir_entry *entry;
-    int val;
 
     rtl8211f = devm_kzalloc(&phydev->mdio.dev, sizeof(*rtl8211f), GFP_KERNEL);
 	if (!rtl8211f)
@@ -590,25 +589,7 @@ int rtl8211f_ptp_probe(struct phy_device *phydev)
     rtl8211f->ptp->phydev = phydev;
     rtl8211f_clk_info = &rtl8211f->ptp->caps;
 
-    rtl8211f->ptp->gpio_base = ioremap(GPIO7_BASE_PHYADDR, 0x1000);
-    if (NULL == rtl8211f->ptp->gpio_base) {
-        dev_err(dev, "ioremap failed\n");
-        return -ENOMEM;
-    }
-
-    /* gpio7_2 input direction */
-    val = readl(rtl8211f->ptp->gpio_base + 0x400);
-    val &= ~(1 << 2);
-    writel(val, rtl8211f->ptp->gpio_base + 0x400);
-
-    rtl8211f->ptp->gpio_level = readl(rtl8211f->ptp->gpio_base + (4 << 2));
-    if (rtl8211f->ptp->gpio_level == 1 << 2) {
-    	phydev->priv = rtl8211f;
-
-        rtl8211f_ptp_init(phydev);
-
-        dev_info(&phydev->mdio.dev, "RTL8211FS(1)-VS PTP is supported\n");
-    }
+    phydev->priv = rtl8211f;
 
     entry = proc_create_data("rtl8211f_ptp", 0666, NULL,
                              &rtl8211f_ptp_proc_ops, NULL);
@@ -835,10 +816,27 @@ static int __init rtl8211f_gpio_interrupt_init(void)
     char gname[16];
     int ret = 0;
     u32 val;
-    
+
+    ptp->gpio_base = ioremap(GPIO7_BASE_PHYADDR, 0x1000);
+    if (NULL == ptp->gpio_base) {
+        dev_err(dev, "ioremap failed\n");
+        return -ENOMEM;
+    }
+
+    /* gpio7_2 input direction */
+    val = readl(ptp->gpio_base + 0x400);
+    val &= ~(1 << 2);
+    writel(val, ptp->gpio_base + 0x400);
+
+    ptp->gpio_level = readl(ptp->gpio_base + (4 << 2));
+    if (ptp->gpio_level == 0) {
+        iounmap(ptp->gpio_base);
+        dev_info(&phydev->mdio.dev, "RTL8211FS(1)-VS PTP is not supported\n");
+        return -EINVAL;
+    }
+
     /* ptp support if gpio7_2 is high */
-    if (ptp->gpio_level == 0)
-        return 0;
+    rtl8211f_ptp_init(phydev);
     
     /* falling edge */
     /* GPIO_ISR 0x404, set triger type, level or edge */
@@ -892,6 +890,8 @@ static int __init rtl8211f_gpio_interrupt_init(void)
         dev_err(dev, "realtek ptp creat failed\n");
         return -EINVAL;
     }
+
+    dev_info(&phydev->mdio.dev, "RTL8211FS(1)-VS PTP is supported\n");
 
     return 0;
 }
