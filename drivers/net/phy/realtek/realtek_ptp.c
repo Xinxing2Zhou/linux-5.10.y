@@ -2,9 +2,9 @@
 /*
  * Driver for Realtek 8211FS(I)-VS PHYs - timestamping and PHC support
  *
- * Authors: Xinxing Zhou
+ * Authors: Xinxing Zhou xn989695@dal.ca
  * License: GPL
- * Copyright (c) 2024 Vision Zenith Corporation
+ * 
  */
 
 #include <linux/gpio/consumer.h>
@@ -830,7 +830,6 @@ static int __init rtl8211f_gpio_interrupt_init(void)
 
     ptp->gpio_level = readl(ptp->gpio_base + (4 << 2));
     if (ptp->gpio_level == 0) {
-        iounmap(ptp->gpio_base);
         dev_info(&phydev->mdio.dev, "RTL8211FS(1)-VS PTP is not supported\n");
         return -EINVAL;
     }
